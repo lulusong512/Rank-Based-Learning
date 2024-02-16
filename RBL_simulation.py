@@ -654,6 +654,10 @@ def rbl(data,num_val,g):
         
         i = random.randint(0, len(my_list) - 1)
         j = random.randint(0, len(my_list) - 1)
+
+        #swap the two elements
+        my_list[i], my_list[j] = my_list[j], my_list[i]
+        #print('a'+ str(my_list))
         
             #skip this i and j if they have been checked before
         if tuple(my_list) in visit or i == j:
@@ -661,10 +665,6 @@ def rbl(data,num_val,g):
         # Add the current permutation to the visit set
         visit.add(tuple(my_list))
         
-        #swap the two elements
-        #my_list_copy[i], my_list_copy[j] = my_list_copy[j], my_list_copy[i] 
-        my_list[i], my_list[j] = my_list[j], my_list[i]
-        #print('a'+ str(my_list))
         #save train
         score1,save_u,u_case,u_control = cal_score3(my_list,train,train_freq1,train_freq0)
         score_u.append(score1)
