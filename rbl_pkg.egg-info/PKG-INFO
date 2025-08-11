@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: rbl_pkg
+Version: 0.1
+Summary: Rank-Based Learning algorithm for binary classification 
+Author: Lulu Song
+Requires-Python: >=3.8
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: scikit-learn
+Requires-Dist: joblib
+Dynamic: author
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
