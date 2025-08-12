@@ -338,7 +338,7 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
 
     return train_auc_save,val_auc_save,val_auc_save2,save[best_score]
 
-def cal_auc_per_data(train,val,val2,test,g_range = [0.2]):
+def cal_auc_per_data(train,val,val2,test,g_range = [0.2],initial_iter = 100, mcmc_iter = 5000):
     """
     Parameters:
         data(dataframe):input dataframe
@@ -367,7 +367,7 @@ def cal_auc_per_data(train,val,val2,test,g_range = [0.2]):
     best_val = 0
     
     for i in g_range:
-        _,_,_,perm = rbl(train,val,val2)
+        _,_,_,perm = rbl(train,val,val2, g = i, initial_iter = initial_iter, mcmc_iter = mcmc_iter)
         
         # Calculate AUC on validation set with the obtained permutation
         score_val, save_u_v, _, _ = cal_score(perm,val,val_freq1,val_freq0)
