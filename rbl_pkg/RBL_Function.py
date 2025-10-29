@@ -19,11 +19,9 @@ def score(l1, t):
     """
     n = len(l1)
     # Create a fast lookup for original positions of elements in l1
-    # This is O(n)
     l1_pos_map = {val: i for i, val in enumerate(l1)}
 
     # Create a dictionary to map parameter index to its value and position in l1
-    # This is O(n)
     dic = {}
     for i, value_t in enumerate(t):
         # i is the feature index (0 to n-1)
@@ -32,8 +30,7 @@ def score(l1, t):
         dic[i] = [l1_pos_map[i], value_t]
 
     u = 0
-    # The combinations generation is still O(n^2)
-    # This loop is O(n^2)
+
     for i_idx in range(n):
         for j_idx in range(i_idx + 1, n):
             # i_idx and j_idx are the feature indices (e.g., 0, 1, 2...)
@@ -68,10 +65,10 @@ def cal_score(l1, selected,n_case,n_control):
         tuple: U score, saved U values, U case, U control.
     """
     def compute_score(r, t):
-        #case
+        # Case
         if selected.iloc[r, -1] == 1:
             return score(l1, t), r,1
-        #control
+        # Control
         elif selected.iloc[r, -1] == 0:
             return score(l1, t), r,0
 
@@ -90,15 +87,13 @@ def cal_score(l1, selected,n_case,n_control):
     return round(u,2), save_u, round(u_case,2), round(u_control,2)
 
 
-def cal_auc(data, permutation, save_best_u):
+def cal_auc(data, save_best_u):
     """
-    Calculate the AUC score for a given data subset and permutation.
+    Calculate the AUC score for a given data subset and their respective calculated scores.
 
     Parameters:
         data (DataFrame): The dataset containing features and the target variable.
                           Expected to have integer column names after preprocessing.
-        permutation (list): A list of column indices representing the feature order
-                            (these are the feature columns).
         save_best_u (dict): A dictionary mapping original row indices
                             (or some identifier) to their respective calculated scores.
                             Assumes values are ordered correctly if converted to a list.
@@ -147,7 +142,7 @@ def cal_auc_ci(data, permutation, n_bootstrap=1000, confidence_level=0.95):
     n_neg_full = int(freq_full.get(0, 0))
     n_pos_full = int(freq_full.get(1, 0))
 
-    # cal_score(permutation, selected_df, n_pos, n_neg) 返回 (_, save_u, ...)，
+    # cal_score(permutation, selected_df, n_pos, n_neg) return (_, save_u, ...)，
     _, save_u_full, _, _ = cal_score(permutation, df, n_pos_full, n_neg_full)
 
     # Bootstrap loop for AUC estimation by looking up pre-computed scores
@@ -189,8 +184,7 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
     Find the optimal permutation.
 
     Parameters:
-        data(dataframe):input dataframe. The last column must be a binary outcome variable with values 0 and 1.
-        num_val(int):the number of validation dataset to be sampled
+        train,val,val2(dataframe):input dataframe. The last column must be a binary outcome variable with values 0 and 1.
         g(float): after g percentage of iterations, check the performance
         initial_iter (int): number of random permutations to try initially to find a strong starting point
         mcmc_iter (int): maximum number of iterations for the Markov Chain Monte Carlo (MCMC) search process to refine the permutation and maximize the score.
@@ -230,17 +224,19 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
     best_permu_base = []
     
     start_time = time.time()  # Record the start time
-    
+        
+    # -------------------- Initialization stage --------------------
+    print("\n Initialization stage started...")
     for k in range(initial_iter):
         random.seed(k)
         random.shuffle(cur_perm)
         # Calculate scores and AUCs
-        score_b,save_b, _, _= cal_score(cur_perm,train,train_freq1,train_freq0)
-        auc_train = cal_auc(train,cur_perm,save_b)
-        score_val_b,save_u_v_b, _, _ = cal_score(cur_perm,val,val_freq1,val_freq0)
-        auc_val = cal_auc(val,cur_perm,save_u_v_b)
-        score_val_b2,save_u_v_b2, _, _ = cal_score(cur_perm,val2,val2_freq1,val2_freq0)
-        auc_val2 = cal_auc(val2,cur_perm,save_u_v_b2)
+        _,save_b, _, _= cal_score(cur_perm,train,train_freq1,train_freq0)
+        auc_train = cal_auc(train,save_b)
+        _,save_u_v_b, _, _ = cal_score(cur_perm,val,val_freq1,val_freq0)
+        auc_val = cal_auc(val,save_u_v_b)
+        _,save_u_v_b2, _, _ = cal_score(cur_perm,val2,val2_freq1,val2_freq0)
+        auc_val2 = cal_auc(val2,save_u_v_b2)
         
         # Check if scores and AUCs meet conditions
         if auc_train > 0.5 and auc_val > 0.5 and auc_val2 > 0.5 and ((auc_train+auc_val+auc_val2)/3 > (auc_base_train+auc_base_val+auc_base_val2)/3):
@@ -259,6 +255,8 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
         random.shuffle(cur_perm)
         cur_perm = list(num_features)
 
+    # -------------------- MCMC stage --------------------
+    print("\n MCMC refinement stage started...")
     # Initialize variables for MCMC
     best_score = float('-inf')
     save = {}
@@ -270,7 +268,7 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
     val_auc_save = []
     val_auc_save2 = []
     
-    #for early stop
+    # Initialize variables for early stop 
     cur = float('inf')
     cur_auc = 0
     # Main loop for MCMC
@@ -279,31 +277,31 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
         i = random.randint(0, len(cur_perm) - 1)
         j = random.randint(0, len(cur_perm) - 1)
         
-        #swap the two elements
+        # Swap the two elements
         cur_perm[i], cur_perm[j] = cur_perm[j], cur_perm[i]
         
-        #skip this i and j if they have been checked before
+        # Skip this i and j if they have been checked before
         if tuple(cur_perm) in visit or i == j:
             continue
         # Add the current permutation to the visit set
         visit.add(tuple(cur_perm))
         
-        #save train
+        # Save train
         score_train, save_u, _, _  = cal_score(cur_perm,train,train_freq1,train_freq0)
-        auc_train = cal_auc(train,cur_perm,save_u)
+        auc_train = cal_auc(train,save_u)
         train_auc_save.append(round(auc_train,2))
 
-        #save val
+        # Save val
         score_val, save_u_v, _, _= cal_score(cur_perm,val,val_freq1,val_freq0)
-        auc_val = cal_auc(val,cur_perm,save_u_v)
+        auc_val = cal_auc(val,save_u_v)
         val_auc_save.append(round(auc_val,2))
 
-        #save val2
+        # Save val2
         score_val2, save_u_v2, _, _ = cal_score(cur_perm,val2,val2_freq1,val2_freq0)
-        auc_val2 = cal_auc(val2,cur_perm,save_u_v2)
+        auc_val2 = cal_auc(val2,save_u_v2)
         val_auc_save2.append(round(auc_val2,2))
 
-        #MCMC
+        # MCMC
         if (score_train > score_train_prev) and (score_val > score_val_prev) and (score_val2 > score_val2_prev):
             score_train_prev = score_train
             score_val_prev = score_val
@@ -315,7 +313,8 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
  
         else:
             cur_perm[i], cur_perm[j] = cur_perm[j], cur_perm[i]
-        #early stop
+
+        # Early stop
         if k>0 and k%500 == 0:
             print(k)
             cur = k
@@ -371,7 +370,7 @@ def cal_auc_per_data(train,val,val2,test,g_range = [0.2],initial_iter = 100, mcm
         # Calculate AUC on validation set with the obtained permutation
         score_val, save_u_v, _, _ = cal_score(perm,val,val_freq1,val_freq0)
         # Update best parameter and AUC if current AUC is higher
-        auc_val = cal_auc(val,perm,save_u_v)
+        auc_val = cal_auc(val,save_u_v)
         if auc_val > best_val:
             best_g = i
             best_val = auc_val
@@ -383,11 +382,11 @@ def cal_auc_per_data(train,val,val2,test,g_range = [0.2],initial_iter = 100, mcm
 
     # Calculate train auc
     _, save_u, _, _ = cal_score(best_perm,train,train_freq1,train_freq0)
-    train_auc = cal_auc(train,best_perm,save_u)
+    train_auc = cal_auc(train,save_u)
 
     # Calculate test auc
     _, save_u_t,_, _ = cal_score(best_perm,test,test_freq1,test_freq0)
-    test_auc = cal_auc(test,best_perm,save_u_t)
+    test_auc = cal_auc(test,save_u_t)
     
     return train_auc, test_auc, best_perm
 
