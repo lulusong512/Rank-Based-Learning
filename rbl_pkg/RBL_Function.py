@@ -269,7 +269,6 @@ def rbl(train,val,val2,g = 0.2, initial_iter = 100, mcmc_iter = 5000):
     train_auc_save = []
     val_auc_save = []
     val_auc_save2 = []
-    #test_auc_save = [] ###待删
     
     #for early stop
     cur = float('inf')
