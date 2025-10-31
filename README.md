@@ -28,10 +28,12 @@ conda create -n rbl_env python=3.11
 conda activate rbl_env
 ```
 
-### 2. Install package
+### 2. Install package directly from GitHub
 
 ```bash
-pip install rbl_pkg
+git clone https://github.com/lulusong512/Rank-Based-Learning.git
+cd Rank-Based-Learning
+pip install -e .
 ```
 
 
