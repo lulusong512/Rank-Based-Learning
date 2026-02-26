@@ -15,7 +15,15 @@
 ---
 ## Cite
 
-If you use this code in any published work, please cite XX (placeholder for the forthcoming publication).
+If you use this code in any published work, please cite @article{song2025rankbased,
+  title={Rank-based learning: A novel high-throughput algorithm resilient to missing data and effective for datasets with small sample size},
+  author={Song, Lulu and Rudsari, Hamid Khoshfekr and Fahrmann, Johannes F and Vykoukal, Jody and Hanash, Sam and Long, James P and Irajizad, Ehsan},
+  journal={Briefings in Bioinformatics},
+  volume={26},
+  number={6},
+  year={2025},
+  doi={10.1093/bib/bbaf666}
+}.
 
 ## Installation
 
