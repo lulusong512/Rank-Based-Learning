@@ -14,16 +14,11 @@
 
 ---
 ## Cite
-
-If you use this code in any published work, please cite @article{song2025rankbased,
-  title={Rank-based learning: A novel high-throughput algorithm resilient to missing data and effective for datasets with small sample size},
-  author={Song, Lulu and Rudsari, Hamid Khoshfekr and Fahrmann, Johannes F and Vykoukal, Jody and Hanash, Sam and Long, James P and Irajizad, Ehsan},
-  journal={Briefings in Bioinformatics},
-  volume={26},
-  number={6},
-  year={2025},
-  doi={10.1093/bib/bbaf666}
-}.
+If you use this code in any published work, please cite:
+Song, L., Rudsari, H. K., Fahrmann, J. F., Vykoukal, J., Hanash, S., Long, J. P., & Irajizad, E. (2025).
+Rank-based learning: A novel high-throughput algorithm resilient to missing data and effective for datasets with small sample size.
+Briefings in Bioinformatics, 26(6).
+https://doi.org/10.1093/bib/bbaf666
 
 ## Installation
 
